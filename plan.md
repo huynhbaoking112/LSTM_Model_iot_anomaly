@@ -74,39 +74,39 @@
 
 ## Giai đoạn 5: Đánh giá và Evaluation
 
-- [ ] Implement evaluator module (`src/evaluator.py`)
-  - [ ] Tạo class `AnomalyEvaluator`
-  - [ ] Implement unsupervised evaluation metrics
+- [x] Implement evaluator module (`src/evaluator.py`)
+  - [x] Tạo class `AnomalyEvaluator`
+  - [x] Implement unsupervised evaluation metrics
   - [ ] Implement supervised metrics (nếu có ground truth)
   - [ ] Implement confusion matrix calculation
 
-- [ ] Tạo visualization functions
-  - [ ] Plot reconstruction errors distribution
-  - [ ] Plot detected anomalies trên time series
-  - [ ] Plot training history (loss curves)
-  - [ ] Plot evaluation metrics summary
+- [x] Tạo visualization functions
+  - [x] Plot reconstruction errors distribution
+  - [x] Plot detected anomalies trên time series
+  - [x] Plot training history (loss curves)
+  - [x] Plot evaluation metrics summary
 
-- [ ] NO2-specific performance analysis
-  - [ ] Tính precision, recall, F1-score cho NO2 anomaly detection
-  - [ ] Phân tích false positives/negatives trong context của NO2 patterns
-  - [ ] Đánh giá sensitivity của threshold cho different NO2 scenarios:
-    - [ ] Rush hour vs off-peak detection accuracy
-    - [ ] Weekend vs weekday pattern recognition
-    - [ ] Seasonal variation handling
-  - [ ] Validate against known NO2 pollution events (if available)
+- [x] NO2-specific performance analysis
+  - [x] Tính precision, recall, F1-score cho NO2 anomaly detection
+  - [x] Phân tích false positives/negatives trong context của NO2 patterns
+  - [x] Đánh giá sensitivity của threshold cho different NO2 scenarios:
+    - [x] Rush hour vs off-peak detection accuracy
+    - [x] Weekend vs weekday pattern recognition
+    - [x] Seasonal variation handling
+  - [x] Validate against known NO2 pollution events (if available)
 
 ## Giai đoạn 6: Integration và Main Pipeline
 
-- [ ] Implement main script (`main.py`)
-  - [ ] Tạo end-to-end pipeline
-  - [ ] Integrate tất cả modules
-  - [ ] Thêm command-line arguments handling
-  - [ ] Implement logging và progress tracking
+- [x] Implement main script (`main.py`)
+  - [x] Tạo end-to-end pipeline
+  - [x] Integrate tất cả modules
+  - [x] Thêm command-line arguments handling
+  - [x] Implement logging và progress tracking
 
-- [ ] Error handling và robustness
-  - [ ] Thêm comprehensive error handling
-  - [ ] Implement graceful degradation
-  - [ ] Thêm input validation
+- [x] Error handling và robustness
+  - [x] Thêm comprehensive error handling
+  - [x] Implement graceful degradation
+  - [x] Thêm input validation
 
 ## Giai đoạn 7: Testing và Validation
 
