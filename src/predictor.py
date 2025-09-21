@@ -32,7 +32,11 @@ class Predictor:
             return False
         
         print("🔄 Loading model and scaler...")
-        self.model = tf.keras.models.load_model(MODEL_PATH)
+        # Apply the same fix as in lstm_model.py
+        self.model = tf.keras.models.load_model(
+            MODEL_PATH,
+            custom_objects={'mae': tf.keras.losses.MeanAbsoluteError()}
+        )
         self.scaler = joblib.load(SCALER_PATH)
 
         print("   -> Recalculating anomaly threshold from original validation set...")

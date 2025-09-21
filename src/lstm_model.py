@@ -152,7 +152,12 @@ class LSTMAutoencoder:
         """Loads a pre-trained model from disk."""
         if os.path.exists(MODEL_PATH):
             print(f"🔄 Loading saved model from '{MODEL_PATH}'...")
-            self.model = tf.keras.models.load_model(MODEL_PATH)
+            # Provide the custom object dictionary to help Keras find the 'mae' function
+            # This is necessary for newer versions of TensorFlow/Keras
+            self.model = tf.keras.models.load_model(
+                MODEL_PATH,
+                custom_objects={'mae': tf.keras.losses.MeanAbsoluteError()}
+            )
         else:
             print(f"⚠️ No saved model found at '{MODEL_PATH}'.")
 

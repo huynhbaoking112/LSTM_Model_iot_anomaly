@@ -1,5 +1,5 @@
 """
-Module to load and preprocess the "Air Quality in Madrid (2001-2018)" dataset from Kaggle.
+Module to load and preprocess the "Madrid Polution (2001-2022)" dataset.
 """
 import pandas as pd
 import numpy as np
@@ -12,21 +12,11 @@ from config import RAW_DATA_PATH, PROCESSED_DATA_PATH
 
 class KaggleDataLoader:
     """
-    Handles loading, cleaning, and standardizing the Madrid Air Quality dataset.
+    Handles loading, cleaning, and standardizing the Madrid Polution dataset.
     """
-    def __init__(self, target_station=28079004):
-        """
-        Initializes the data loader.
-        Args:
-            target_station (int): The ID of the station to focus on. 
-                                  Default is 28079004 (Plaza de España).
-        """
+    def __init__(self):
+        """Initializes the data loader."""
         self.raw_data_path = RAW_DATA_PATH
-        self.target_station = target_station
-        self.station_col_map = {
-            28079004: 'NO_2',  # Plaza de España station has 'NO_2' column for NO2
-            # Add other station mappings if needed
-        }
 
     def load_and_process(self):
         """
@@ -37,59 +27,57 @@ class KaggleDataLoader:
         """
         if not os.path.exists(self.raw_data_path):
             print(f"❌ Error: Dataset not found at '{self.raw_data_path}'.")
-            print("Please follow KAGGLE_DATASET_GUIDE.md to download and place the file.")
+            print("Please ensure the file 'MadridPolution2001-2022.csv' is in the 'data/raw/' directory.")
             return pd.DataFrame()
 
-        print("🔄 Loading Kaggle dataset...")
+        print("🔄 Loading the new Madrid Polution (2001-2022) dataset...")
         df = self._read_data()
 
-        print(f"🔬 Focusing on station ID: {self.target_station} (Plaza de España)")
-        df_station = self._filter_by_station(df)
-
-        if df_station.empty:
-            print(f"⚠️ Warning: No data found for station {self.target_station}.")
+        print("✨ Standardizing data format...")
+        df_standardized = self._standardize_format(df)
+        
+        if df_standardized.empty:
+            print("❌ Standardization failed. Please check the input file format.")
             return pd.DataFrame()
 
-        print("✨ Standardizing data format...")
-        df_standardized = self._standardize_format(df_station)
-        
         print("💾 Saving processed data...")
         self._save_processed_data(df_standardized, PROCESSED_DATA_PATH)
         
-        print("✅ Kaggle data loading and processing complete.")
+        print("✅ New dataset loading and processing complete.")
         return df_standardized
 
     def _read_data(self):
         """Reads the raw CSV data."""
         return pd.read_csv(self.raw_data_path)
 
-    def _filter_by_station(self, df):
-        """Filters the DataFrame to include only the target station."""
-        return df[df['station'] == self.target_station].copy()
-
-    def _standardize_format(self, df_station):
+    def _standardize_format(self, df):
         """
-        Transforms the data into the standard format:
+        Transforms the data into the standard format, focusing on NO2.
         ['timestamp', 'entity_id', 'attribute', 'value']
         """
-        # Rename and select columns
-        no2_col_name = self.station_col_map.get(self.target_station)
-        if no2_col_name not in df_station.columns:
-            print(f"❌ Error: NO2 column '{no2_col_name}' not found for station {self.target_station}.")
+        # Check for required columns
+        if 'Time' not in df.columns or 'NO2' not in df.columns:
+            print(f"❌ Error: Input CSV must contain 'Time' and 'NO2' columns.")
             return pd.DataFrame()
             
-        df_renamed = df_station[['date', no2_col_name]].rename(columns={
-            'date': 'timestamp',
-            no2_col_name: 'value'
+        # Select and rename columns
+        df_renamed = df[['Time', 'NO2']].rename(columns={
+            'Time': 'timestamp',
+            'NO2': 'value'
         })
 
         # Add standard columns
-        df_renamed['entity_id'] = f'Madrid-Station-{self.target_station}'
+        df_renamed['entity_id'] = 'Madrid-Polution-TimeSeries'
         df_renamed['attribute'] = 'NO2'
         
-        # Convert timestamp and handle missing values
-        df_renamed['timestamp'] = pd.to_datetime(df_renamed['timestamp'])
-        df_renamed = df_renamed.dropna(subset=['value'])
+        # Convert timestamp and handle missing/invalid values
+        df_renamed['timestamp'] = pd.to_datetime(df_renamed['timestamp'], errors='coerce')
+        df_renamed['value'] = pd.to_numeric(df_renamed['value'], errors='coerce')
+        
+        # Drop rows where timestamp or value could not be parsed
+        df_renamed.dropna(subset=['timestamp', 'value'], inplace=True)
+        
+        # Sort and reset index
         df_renamed = df_renamed.sort_values('timestamp').reset_index(drop=True)
 
         return df_renamed[['timestamp', 'entity_id', 'attribute', 'value']]
@@ -101,7 +89,7 @@ class KaggleDataLoader:
         print(f"   -> Saved {len(df)} records to '{path}'")
 
 if __name__ == '__main__':
-    print("--- Running Kaggle Data Loader Standalone Test ---")
+    print("--- Running Kaggle Data Loader Standalone Test for new dataset ---")
     loader = KaggleDataLoader()
     processed_df = loader.load_and_process()
 
