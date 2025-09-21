@@ -30,24 +30,24 @@
 
 ## Giai đoạn 3: Tiền xử lý dữ liệu
 
-- [ ] Implement preprocessor module (`src/preprocessor.py`)
-  - [ ] Tạo class `DataPreprocessor`
-  - [ ] Implement method để load dữ liệu từ CSV
-  - [ ] Implement data cleaning (xử lý missing values, duplicates)
-  - [ ] Implement timestamp processing và sorting
-  - [ ] Implement data normalization với MinMaxScaler
+- [x] Implement preprocessor module (`src/preprocessor.py`)
+  - [x] Tạo class `DataPreprocessor`
+  - [x] Implement method để load dữ liệu từ CSV
+  - [x] Implement data cleaning (xử lý missing values, duplicates)
+  - [x] Implement timestamp processing và sorting
+  - [x] Implement data normalization với MinMaxScaler
 
-- [ ] Tạo sequences cho LSTM
-  - [ ] Implement method để tạo sliding window sequences
-  - [ ] Cấu hình sequence length (ví dụ: 24 giờ)
-  - [ ] Implement train/validation/test split
+- [x] Tạo sequences cho LSTM
+  - [x] Implement method để tạo sliding window sequences
+  - [x] Cấu hình sequence length (ví dụ: 24 giờ)
+  - [x] Implement train/validation/test split
 
-- [ ] NO2-specific data quality assessment
-  - [ ] Kiểm tra distribution của NO2 values (typical range: 0-200 μg/m³)
-  - [ ] Phát hiện và xử lý outliers specific cho NO2 (values > 400 μg/m³ có thể là errors)
-  - [ ] Phân tích daily/weekly patterns của NO2 (thường cao vào rush hours)
-  - [ ] Kiểm tra seasonal variations của NO2 levels
-  - [ ] Tạo visualization để hiểu NO2 temporal patterns
+- [x] NO2-specific data quality assessment
+  - [x] Kiểm tra distribution của NO2 values (typical range: 0-200 μg/m³)
+  - [x] Phát hiện và xử lý outliers specific cho NO2 (values > 400 μg/m³ có thể là errors)
+  - [x] Phân tích daily/weekly patterns của NO2 (thường cao vào rush hours)
+  - [x] Kiểm tra seasonal variations của NO2 levels
+  - [x] Tạo visualization để hiểu NO2 temporal patterns
 
 ## Giai đoạn 4: Xây dựng LSTM Autoencoder Model
 
