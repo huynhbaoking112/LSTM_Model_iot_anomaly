@@ -51,26 +51,26 @@
 
 ## Giai đoạn 4: Xây dựng LSTM Autoencoder Model
 
-- [ ] Implement LSTM model module (`src/lstm_model.py`)
-  - [ ] Tạo class `LSTMAutoencoder`
-  - [ ] Design architecture: Encoder-Decoder với LSTM layers
-  - [ ] Thêm Dropout layers để tránh overfitting
-  - [ ] Implement model compilation với optimizer và loss function
+- [x] Implement LSTM model module (`src/lstm_model.py`)
+  - [x] Tạo class `LSTMAutoencoder`
+  - [x] Design architecture: Encoder-Decoder với LSTM layers
+  - [x] Thêm Dropout layers để tránh overfitting
+  - [x] Implement model compilation với optimizer và loss function
 
-- [ ] Implement training pipeline
-  - [ ] Setup callbacks (EarlyStopping, ModelCheckpoint)
-  - [ ] Implement training method với validation
-  - [ ] Implement method để save/load model
-  - [ ] Thêm training history visualization
+- [x] Implement training pipeline
+  - [x] Setup callbacks (EarlyStopping, ModelCheckpoint)
+  - [x] Implement training method với validation
+  - [x] Implement method để save/load model
+  - [x] Thêm training history visualization
 
-- [ ] Implement NO2-specific anomaly detection logic
-  - [ ] Implement method để predict và tính reconstruction error cho NO2 time series
-  - [ ] Implement adaptive threshold setting dựa trên NO2 temporal patterns
-  - [ ] Implement domain-specific rules cho NO2 anomalies:
+- [x] Implement NO2-specific anomaly detection logic
+  - [x] Implement method để predict và tính reconstruction error cho NO2 time series
+  - [x] Implement adaptive threshold setting dựa trên NO2 temporal patterns
+  - [x] Implement domain-specific rules cho NO2 anomalies:
     - [ ] Sudden spikes > 3x normal levels
     - [ ] Unusual patterns outside typical daily cycles
     - [ ] Extended periods of abnormally low/high values
-  - [ ] Implement anomaly detection method với contextual awareness
+  - [x] Implement anomaly detection method với contextual awareness
 
 ## Giai đoạn 5: Đánh giá và Evaluation
 

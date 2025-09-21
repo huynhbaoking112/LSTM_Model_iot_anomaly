@@ -25,13 +25,13 @@ BATCH_SIZE = 32
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
-# NO2-specific LSTM Parameters
-LSTM_UNITS_ENCODER = 64
-LSTM_UNITS_DECODER = 32
-DROPOUT_RATE = 0.2
+# LSTM Autoencoder Architecture
+LSTM_UNITS_ENCODER = [128, 64]  # Units in Encoder layers
+LSTM_UNITS_DECODER = [64, 128]  # Units in Decoder layers
+DROPOUT_RATE = 0.2             # Dropout rate for regularization
 
-# Thresholds for NO2 Anomaly Detection
-ANOMALY_THRESHOLD_PERCENTILE = 95  # Use 95th percentile of validation errors
+# Anomaly Detection Threshold
+ANOMALY_THRESHOLD_PERCENTILE = 95  # Use 95th percentile of validation errors as threshold
 NO2_SPIKE_MULTIPLIER = 3.0  # Detect spikes > 3x normal levels
 
 # NO2 Temporal Pattern Configuration
