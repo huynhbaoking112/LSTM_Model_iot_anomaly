@@ -1,10 +1,13 @@
 """
 Main FastAPI application for the Alerting Server.
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from dateutil.parser import isoparse
 from models import AlertPayload
-from database import save_alert
+from database import save_alert, get_alerts
 
 app = FastAPI(
     title="IoT Anomaly Alerting API",
@@ -12,10 +15,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# --- Templating and Static Files Setup ---
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
 @app.get("/", tags=["Health Check"])
 def read_root():
     """A simple health check endpoint."""
     return {"status": "ok", "message": "Alerting API is running."}
+
+@app.get("/dashboard", response_class=HTMLResponse, tags=["Monitoring"])
+def view_dashboard(request: Request):
+    """
+    Renders the monitoring dashboard, displaying the latest alerts.
+    """
+    alerts_data = get_alerts()
+    return templates.TemplateResponse(
+        "index.html", 
+        {"request": request, "alerts": alerts_data}
+    )
 
 @app.post("/api/alerts", tags=["Alerts"], status_code=201)
 def create_alert(payload: AlertPayload):

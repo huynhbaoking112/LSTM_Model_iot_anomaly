@@ -48,34 +48,45 @@
 
 ## Giai đoạn 3: Kiểm thử Tích hợp (Integration Testing)
 
--   [ ] **Kiểm thử trên Local**
-    -   [ ] Chạy server FastAPI trên local: `uvicorn alert_server.main:app --reload`.
-    -   [ ] Chạy `predictor.py` với một file test bất thường.
-    -   [ ] Kiểm tra log của server FastAPI để xem có nhận được request không.
-    -   [ ] Đăng nhập vào MongoDB Atlas và kiểm tra xem document cảnh báo mới đã được tạo trong collection `alerts` chưa.
+-   [x] **Kiểm thử trên Local**
+    -   [x] Chạy server FastAPI trên local: `uvicorn alert_server.main:app --reload`.
+    -   [x] Chạy `predictor.py` với một file test bất thường.
+    -   [x] Kiểm tra log của server FastAPI để xem có nhận được request không.
+    -   [x] Đăng nhập vào MongoDB Atlas và kiểm tra xem document cảnh báo mới đã được tạo trong collection `alerts` chưa.
 
--   [ ] **Kiểm thử Xử lý Lỗi**
-    -   [ ] Tắt server FastAPI và chạy lại `predictor.py`.
-    -   [ ] Xác nhận rằng `predictor` vẫn chạy đến cùng mà không bị crash, chỉ in ra lỗi không thể kết nối.
+-   [x] **Kiểm thử Xử lý Lỗi**
+    -   [x] Tắt server FastAPI và chạy lại `predictor.py`.
+    -   [x] Xác nhận rằng `predictor` vẫn chạy đến cùng mà không bị crash, chỉ in ra lỗi không thể kết nối.
 
-## Giai đoạn 4: Deployment Lên VPS
+## Giai đoạn 4: Xây dựng Giao diện Giám sát (SSR)
 
--   [ ] **Chuẩn bị Môi trường VPS**
-    -   [ ] Cài đặt Python, pip, và Nginx trên server.
-    -   [ ] Sao chép thư mục `alert_server/` lên VPS.
-    -   [ ] Cài đặt các thư viện từ `requirements.txt` của server.
+-   [ ] **Cập nhật Dependencies & Cấu hình**
+    -   [ ] Thêm `Jinja2` vào `alert_server/requirements.txt`.
+    -   [ ] Cấu hình FastAPI để sử dụng Jinja2 templates.
+    -   [ ] Tạo thư mục `templates/` và `static/` trong `alert_server/`.
 
--   [ ] **Cấu hình Web Server Production**
-    -   [ ] Sử dụng Gunicorn hoặc Uvicorn để chạy ứng dụng FastAPI một cách ổn định.
-    -   [ ] Viết một file service `systemd` để quản lý tiến trình của server (tự động khởi động, restart khi có lỗi).
+-   [ ] **Thiết kế Trang Dashboard**
+    -   [ ] Tạo tệp `templates/index.html`.
+    -   [ ] Viết mã HTML để hiển thị danh sách các cảnh báo (ID, thời gian, điểm bất thường).
+    -   [ ] Thêm một chút CSS trong `static/styles.css` để giao diện trông gọn gàng hơn.
 
--   [ ] **Cấu hình Reverse Proxy (Nginx)**
-    -   [ ] Cấu hình Nginx để chuyển tiếp các request từ port 80 (HTTP) đến ứng dụng FastAPI đang chạy trên port 8000.
-    -   [ ] (Tùy chọn) Cấu hình SSL với Let's Encrypt để bật HTTPS.
+-   [ ] **Nâng cấp Server**
+    -   [ ] Viết một hàm mới trong `database.py` để truy vấn tất cả các cảnh báo từ MongoDB.
+    -   [ ] Tạo một endpoint mới `GET /dashboard` trong `main.py`.
+    -   [ ] Endpoint này sẽ lấy dữ liệu từ database và render trang `index.html` với dữ liệu đó.
 
--   [ ] **Kiểm thử Cuối cùng**
-    -   [ ] Cập nhật `ALERTING_API_ENDPOINT` trong `config.py` thành địa chỉ IP hoặc tên miền của VPS.
-    -   [ ] Chạy `predictor.py` từ máy local và kiểm tra xem cảnh báo có được lưu vào MongoDB trên cloud không.
+-   [ ] **Kiểm thử Giao diện**
+    -   [ ] Chạy lại server.
+    -   [ ] Mở trình duyệt và truy cập `http://127.0.0.1:8000/dashboard`.
+    -   [ ] Xác nhận rằng các cảnh báo đã được gửi trước đó hiển thị chính xác trên trang.
+
+-   [ ] **Nâng cấp Giao diện Chi tiết (với Biểu đồ)**
+    -   [ ] Thêm thư viện `Chart.js` vào thư mục `static/`.
+    -   [ ] Viết hàm `get_alert_by_id` trong `database.py`.
+    -   [ ] Tạo template `alert_detail.html` với thẻ `<canvas>` cho biểu đồ.
+    -   [ ] Tạo endpoint `GET /dashboard/alert/{alert_id}` trong `main.py` để render trang chi tiết.
+    -   [ ] Cập nhật link trong `index.html` để trỏ đến trang chi tiết.
+    -   [ ] Viết mã JavaScript trong `alert_detail.html` để vẽ biểu đồ từ dữ liệu được truyền vào.
 
 ---
 **Hoàn thành các bước trên sẽ tạo ra một hệ thống cảnh báo end-to-end hoàn chỉnh và mạnh mẽ.**

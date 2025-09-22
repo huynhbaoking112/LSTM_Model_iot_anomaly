@@ -1,0 +1,67 @@
+/* Basic styling for the alerts dashboard */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #2c3e50;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.alerts-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.alerts-table th, .alerts-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.alerts-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.alerts-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.alerts-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.score {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.threshold {
+    color: #7f8c8d;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

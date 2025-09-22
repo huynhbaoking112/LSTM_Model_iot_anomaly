@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Alerts Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Anomaly Alerts Dashboard</h1>
+        <p>Showing the last 50 alerts, most recent first.</p>
+        <table class="alerts-table">
+            <thead>
+                <tr>
+                    <th>Alert Timestamp</th>
+                    <th>Sensor ID</th>
+                    <th>Anomaly Score</th>
+                    <th>Threshold</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alert in alerts %}
+                <tr>
+                    <td>{{ alert.alert_timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC</td>
+                    <td>{{ alert.sensor_id }}</td>
+                    <td class="score">{{ "%.4f"|format(alert.anomaly_score) }}</td>
+                    <td class="threshold">{{ "%.4f"|format(alert.threshold) }}</td>
+                    <td><a href="#">View Sequence</a></td> <!-- Placeholder -->
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No alerts found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

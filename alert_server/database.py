@@ -2,7 +2,7 @@
 Handles all database operations, including connecting to MongoDB
 and saving alert documents.
 """
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from pymongo.errors import ConnectionFailure, OperationFailure
 from config import MONGO_CONNECTION_STRING
 
@@ -52,3 +52,25 @@ def save_alert(alert_data: dict) -> (bool, str):
         error_message = f"Failed to save alert to DB: {e}"
         print(f"   -> ❌ {error_message}")
         return False, error_message
+
+def get_alerts(limit: int = 50) -> list:
+    """
+    Retrieves the most recent alerts from the database.
+
+    Args:
+        limit (int): The maximum number of alerts to retrieve.
+
+    Returns:
+        list: A list of alert documents, or an empty list if none are found or on error.
+    """
+    if alerts_collection is None:
+        print("   -> ❌ Database collection is not available.")
+        return []
+    
+    try:
+        # Sort by 'alert_timestamp' in descending order to get the newest first
+        alerts = alerts_collection.find().sort("alert_timestamp", DESCENDING).limit(limit)
+        return list(alerts)
+    except OperationFailure as e:
+        print(f"   -> ❌ Failed to fetch alerts from DB: {e}")
+        return []
