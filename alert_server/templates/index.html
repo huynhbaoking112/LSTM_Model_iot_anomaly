@@ -34,58 +34,148 @@
     <!-- Main Content -->
     <main class="container">
         {% if alerts %}
+            <!-- Summary Cards -->
+            <div class="summary-section">
+                <div class="summary-card summary-critical">
+                    <div class="summary-icon">🚨</div>
+                    <div class="summary-content">
+                        <div class="summary-number">{{ alerts|selectattr('anomaly_score', '>', alerts[0].threshold if alerts else 0)|list|length if alerts else 0 }}</div>
+                        <div class="summary-label">Critical Alerts</div>
+                        <div class="summary-desc">Require immediate attention</div>
+                    </div>
+                </div>
+                <div class="summary-card summary-warning">
+                    <div class="summary-icon">⚠️</div>
+                    <div class="summary-content">
+                        <div class="summary-number">{{ alerts|length }}</div>
+                        <div class="summary-label">Total Detections</div>
+                        <div class="summary-desc">All anomaly events</div>
+                    </div>
+                </div>
+                <div class="summary-card summary-info">
+                    <div class="summary-icon">📊</div>
+                    <div class="summary-content">
+                        <div class="summary-number">{{ pagination.total_alerts }}</div>
+                        <div class="summary-label">Database Records</div>
+                        <div class="summary-desc">Historical data points</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="alerts-grid">
                 {% for alert in alerts %}
-                <div class="alert-card">
+                <div class="alert-card priority-{{ 'high' if alert.anomaly_score > (alert.threshold * 1.5) else 'medium' if alert.anomaly_score > alert.threshold else 'low' }}">
                     <div class="alert-card-header">
-                        <h3 class="alert-card-title">{{ alert.sensor_id }}</h3>
-                        <span class="alert-status status-anomaly">Anomaly</span>
+                        <div class="alert-header-left">
+                            <h3 class="alert-card-title">{{ alert.sensor_id }}</h3>
+                            <div class="alert-subtitle">
+                                {% if alert.anomaly_score > (alert.threshold * 1.5) %}
+                                    🚨 Critical Anomaly
+                                {% elif alert.anomaly_score > alert.threshold %}
+                                    ⚠️ Moderate Anomaly
+                                {% else %}
+                                    ℹ️ Minor Anomaly
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="alert-header-right">
+                            <span class="alert-status status-anomaly">
+                                {% if alert.anomaly_score > (alert.threshold * 1.5) %}
+                                    Critical
+                                {% elif alert.anomaly_score > alert.threshold %}
+                                    High
+                                {% else %}
+                                    Medium
+                                {% endif %}
+                            </span>
+                            <div class="alert-priority-indicator priority-{{ 'high' if alert.anomaly_score > (alert.threshold * 1.5) else 'medium' if alert.anomaly_score > alert.threshold else 'low' }}"></div>
+                        </div>
                     </div>
 
                     <div class="alert-card-body">
-                        <div class="alert-info-grid">
-                            <div class="alert-info-item">
-                                <div class="alert-info-label">Detection Time</div>
-                                <div class="alert-info-value">{{ alert.alert_timestamp.strftime('%Y-%m-%d') }}</div>
+                        <div class="alert-metrics">
+                            <div class="metric-item">
+                                <div class="metric-icon">📅</div>
+                                <div class="metric-content">
+                                    <div class="metric-label">Date</div>
+                                    <div class="metric-value">{{ alert.alert_timestamp.strftime('%b %d, %Y') }}</div>
+                                </div>
                             </div>
-                            <div class="alert-info-item">
-                                <div class="alert-info-label">Time</div>
-                                <div class="alert-info-value">{{ alert.alert_timestamp.strftime('%H:%M:%S') }} UTC</div>
+                            <div class="metric-item">
+                                <div class="metric-icon">🕐</div>
+                                <div class="metric-content">
+                                    <div class="metric-label">Time</div>
+                                    <div class="metric-value">{{ alert.alert_timestamp.strftime('%H:%M:%S') }} UTC</div>
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-icon">📈</div>
+                                <div class="metric-content">
+                                    <div class="metric-label">Score</div>
+                                    <div class="metric-value">{{ "%.4f"|format(alert.anomaly_score) }}</div>
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-icon">⚖️</div>
+                                <div class="metric-content">
+                                    <div class="metric-label">Threshold</div>
+                                    <div class="metric-value">{{ "%.4f"|format(alert.threshold) }}</div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="alert-score">
-                            {{ "%.4f"|format(alert.anomaly_score) }}
+                        <div class="alert-score-container">
+                            <div class="alert-score-label">Anomaly Score</div>
+                            <div class="alert-score-bar">
+                                <div class="alert-score-fill" style="width: {{ [(alert.anomaly_score / (alert.threshold * 2) * 100), 100]|min }}%"></div>
+                                <div class="alert-score-value">{{ "%.4f"|format(alert.anomaly_score) }}</div>
+                            </div>
+                            <div class="alert-score-threshold" style="left: {{ (alert.threshold / (alert.threshold * 2) * 100) }}%"></div>
                         </div>
 
-                        <div class="alert-info-grid">
-                            <div class="alert-info-item">
-                                <div class="alert-info-label">Threshold</div>
-                                <div class="alert-info-value threshold">{{ "%.4f"|format(alert.threshold) }}</div>
-                            </div>
-                            <div class="alert-info-item">
-                                <div class="alert-info-label">Deviation</div>
-                                <div class="alert-info-value">{{ "%.2f"|format(((alert.anomaly_score - alert.threshold) / alert.threshold * 100) if alert.threshold > 0 else 0) }}%</div>
-                            </div>
+                        <div class="alert-deviation">
+                            <span class="deviation-label">Deviation from normal:</span>
+                            <span class="deviation-value {{ 'critical' if alert.anomaly_score > (alert.threshold * 1.5) else 'warning' if alert.anomaly_score > alert.threshold else 'normal' }}">
+                                {{ "%.1f"|format(((alert.anomaly_score - alert.threshold) / alert.threshold * 100) if alert.threshold > 0 else 0) }}%
+                            </span>
                         </div>
                     </div>
 
                     <div class="alert-card-footer">
-                        <div class="alert-timestamp">
-                            Sequence: {{ alert.sequence_data.timestamps|length }} data points
+                        <div class="alert-metadata">
+                            <span class="metadata-item">
+                                <span class="metadata-icon">📋</span>
+                                {{ alert.sequence_data.timestamps|length }} data points
+                            </span>
+                            <span class="metadata-item">
+                                <span class="metadata-icon">🔄</span>
+                                {{ ((alert.alert_timestamp - alert.sequence_data.timestamps[0]) if alert.sequence_data.timestamps else '').seconds // 3600 }}h window
+                            </span>
                         </div>
-                        <a href="/dashboard/alert/{{ alert._id }}" class="view-details-btn">
-                            📈 View Details
-                        </a>
+                        <div class="alert-actions">
+                            <a href="/dashboard/alert/{{ alert._id }}" class="view-details-btn">
+                                <span class="btn-icon">📊</span>
+                                Analyze
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
-                <div class="empty-state-icon">📊</div>
-                <h3>No Alerts Found</h3>
-                <p>Run the anomaly detection system to see alerts appear here.</p>
+                <div class="empty-state-icon">🎯</div>
+                <h3>Ready for Action</h3>
+                <p>Your NO2 anomaly detection system is ready! Run the detection pipeline to start monitoring air quality and receive alerts when anomalies are detected.</p>
+                <div class="empty-state-actions">
+                    <div class="action-suggestion">
+                        <span class="suggestion-icon">💡</span>
+                        <div class="suggestion-content">
+                            <div class="suggestion-title">Quick Start</div>
+                            <div class="suggestion-desc">Run: <code>python src/predictor.py data/raw/test_anomalies.csv</code></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         {% endif %}
 
