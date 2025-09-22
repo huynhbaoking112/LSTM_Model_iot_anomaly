@@ -75,18 +75,18 @@
     -   [ ] Tạo một endpoint mới `GET /dashboard` trong `main.py`.
     -   [ ] Endpoint này sẽ lấy dữ liệu từ database và render trang `index.html` với dữ liệu đó.
 
--   [ ] **Kiểm thử Giao diện**
-    -   [ ] Chạy lại server.
-    -   [ ] Mở trình duyệt và truy cập `http://127.0.0.1:8000/dashboard`.
-    -   [ ] Xác nhận rằng các cảnh báo đã được gửi trước đó hiển thị chính xác trên trang.
+-   [x] **Kiểm thử Giao diện**
+    -   [x] Chạy lại server.
+    -   [x] Mở trình duyệt và truy cập `http://127.0.0.1:8000/dashboard`.
+    -   [x] Xác nhận rằng các cảnh báo đã được gửi trước đó hiển thị chính xác trên trang.
 
--   [ ] **Nâng cấp Giao diện Chi tiết (với Biểu đồ)**
-    -   [ ] Thêm thư viện `Chart.js` vào thư mục `static/`.
-    -   [ ] Viết hàm `get_alert_by_id` trong `database.py`.
-    -   [ ] Tạo template `alert_detail.html` với thẻ `<canvas>` cho biểu đồ.
-    -   [ ] Tạo endpoint `GET /dashboard/alert/{alert_id}` trong `main.py` để render trang chi tiết.
-    -   [ ] Cập nhật link trong `index.html` để trỏ đến trang chi tiết.
-    -   [ ] Viết mã JavaScript trong `alert_detail.html` để vẽ biểu đồ từ dữ liệu được truyền vào.
+-   [x] **Nâng cấp Giao diện Chi tiết (với Biểu đồ)**
+    -   [x] Thêm thư viện `Chart.js` vào thư mục `static/`.
+    -   [x] Viết hàm `get_alert_by_id` trong `database.py`.
+    -   [x] Tạo template `alert_detail.html` với thẻ `<canvas>` cho biểu đồ.
+    -   [x] Tạo endpoint `GET /dashboard/alert/{alert_id}` trong `main.py` để render trang chi tiết.
+    -   [x] Cập nhật link trong `index.html` để trỏ đến trang chi tiết.
+    -   [x] Viết mã JavaScript trong `alert_detail.html` để vẽ biểu đồ từ dữ liệu được truyền vào.
 
 ---
 **Hoàn thành các bước trên sẽ tạo ra một hệ thống cảnh báo end-to-end hoàn chỉnh và mạnh mẽ.**

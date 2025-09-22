@@ -27,7 +27,7 @@
                     <td>{{ alert.sensor_id }}</td>
                     <td class="score">{{ "%.4f"|format(alert.anomaly_score) }}</td>
                     <td class="threshold">{{ "%.4f"|format(alert.threshold) }}</td>
-                    <td><a href="#">View Sequence</a></td> <!-- Placeholder -->
+                    <td><a href="/dashboard/alert/{{ alert._id }}">View Sequence</a></td>
                 </tr>
                 {% else %}
                 <tr>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Detail - {{ alert.sensor_id }}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+        <div class="alert-details">
+            <h3>Alert Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Sensor ID:</span>
+                <span class="detail-value">{{ alert.sensor_id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Alert Timestamp:</span>
+                <span class="detail-value">{{ alert.alert_timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Anomaly Score:</span>
+                <span class="detail-value score">{{ "%.4f"|format(alert.anomaly_score) }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Threshold:</span>
+                <span class="detail-value threshold">{{ "%.4f"|format(alert.threshold) }}</span>
+            </div>
+        </div>
+
+        <div class="sequence-info">
+            <h4>Sequence Data Visualization</h4>
+            <p>This chart shows the original NO2 values vs. the model's reconstruction for the anomalous sequence.</p>
+
+            <div class="chart-container">
+                <canvas id="anomalyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Prepare data for Chart.js
+        const timestamps = [
+            {% for ts in alert.sequence_data.timestamps %}
+                "{{ ts.strftime('%Y-%m-%d %H:%M:%S') }}",
+            {% endfor %}
+        ];
+
+        const originalValues = [
+            {% for val in alert.sequence_data.original_values %}
+                {{ val }},
+            {% endfor %}
+        ];
+
+        const reconstructedValues = [
+            {% for val in alert.sequence_data.reconstructed_values %}
+                {{ val }},
+            {% endfor %}
+        ];
+
+        // Create the chart
+        const ctx = document.getElementById('anomalyChart').getContext('2d');
+        const anomalyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: [{
+                    label: 'Original NO2 Values',
+                    data: originalValues,
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                }, {
+                    label: 'Reconstructed Values',
+                    data: reconstructedValues,
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Timestamp'
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'NO2 (μg/m³)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Anomalous Sequence: Original vs Reconstructed Values'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

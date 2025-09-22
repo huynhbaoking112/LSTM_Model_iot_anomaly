@@ -3,6 +3,7 @@ Handles all database operations, including connecting to MongoDB
 and saving alert documents.
 """
 from pymongo import MongoClient, DESCENDING
+from bson.objectid import ObjectId
 from pymongo.errors import ConnectionFailure, OperationFailure
 from config import MONGO_CONNECTION_STRING
 
@@ -74,3 +75,26 @@ def get_alerts(limit: int = 50) -> list:
     except OperationFailure as e:
         print(f"   -> ❌ Failed to fetch alerts from DB: {e}")
         return []
+
+def get_alert_by_id(alert_id: str) -> dict:
+    """
+    Retrieves a single alert by its ID.
+
+    Args:
+        alert_id (str): The MongoDB ObjectId of the alert.
+
+    Returns:
+        dict: The alert document, or None if not found or on error.
+    """
+    if alerts_collection is None:
+        print("   -> ❌ Database collection is not available.")
+        return None
+
+    try:
+        # Convert string ID to ObjectId
+        obj_id = ObjectId(alert_id)
+        alert = alerts_collection.find_one({"_id": obj_id})
+        return alert
+    except Exception as e:
+        print(f"   -> ❌ Failed to fetch alert {alert_id}: {e}")
+        return None

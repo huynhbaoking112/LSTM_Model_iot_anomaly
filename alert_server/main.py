@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dateutil.parser import isoparse
 from models import AlertPayload
-from database import save_alert, get_alerts
+from database import save_alert, get_alerts, get_alert_by_id
 
 app = FastAPI(
     title="IoT Anomaly Alerting API",
@@ -31,8 +31,23 @@ def view_dashboard(request: Request):
     """
     alerts_data = get_alerts()
     return templates.TemplateResponse(
-        "index.html", 
+        "index.html",
         {"request": request, "alerts": alerts_data}
+    )
+
+@app.get("/dashboard/alert/{alert_id}", response_class=HTMLResponse, tags=["Monitoring"])
+def view_alert_detail(request: Request, alert_id: str):
+    """
+    Renders the detailed view for a specific alert, including visualization.
+    """
+    alert = get_alert_by_id(alert_id)
+
+    if alert is None:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+    return templates.TemplateResponse(
+        "alert_detail.html",
+        {"request": request, "alert": alert}
     )
 
 @app.post("/api/alerts", tags=["Alerts"], status_code=201)
