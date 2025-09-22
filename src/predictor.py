@@ -10,11 +10,30 @@ import tensorflow as tf
 import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
+import requests
+from datetime import datetime
 
 # Add project root to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import MODEL_PATH, SCALER_PATH, SEQUENCE_LENGTH, ANOMALY_THRESHOLD_PERCENTILE, TRAIN_SPLIT, VAL_SPLIT
+from config import (
+    MODEL_PATH, SCALER_PATH, SEQUENCE_LENGTH, ANOMALY_THRESHOLD_PERCENTILE, 
+    TRAIN_SPLIT, VAL_SPLIT, ALERTING_ENABLED, ALERTING_API_ENDPOINT, SENSOR_ID
+)
 from src.preprocessor import DataPreprocessor
+
+def send_alert_to_server(payload):
+    """Sends the alert payload to the configured API endpoint."""
+    if not ALERTING_ENABLED:
+        print("   -> Alerting is disabled. Skipping notification.")
+        return
+
+    try:
+        print(f"   -> 🚨 Sending anomaly alert to {ALERTING_API_ENDPOINT}...")
+        response = requests.post(ALERTING_API_ENDPOINT, json=payload, timeout=10)
+        response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+        print("      -> ✅ Alert successfully sent.")
+    except requests.exceptions.RequestException as e:
+        print(f"      -> ❌ Failed to send alert: {e}")
 
 class Predictor:
     """
@@ -92,6 +111,14 @@ class Predictor:
                 index_col='timestamp'
             )
         
+        # --- NEW: Ensure timestamps are UTC-aware ---
+        # This standardizes the timestamp format before sending and avoids parsing errors.
+        if df.index.tz is None:
+            df.index = df.index.tz_localize('UTC')
+        else:
+            df.index = df.index.tz_convert('UTC')
+        # --- END NEW ---
+
         # Clean up any non-numeric values that might have slipped through
         df['value'] = pd.to_numeric(df['value'], errors='coerce')
         df.dropna(subset=['value'], inplace=True)
@@ -111,6 +138,37 @@ class Predictor:
         mae = np.mean(np.abs(reconstructions - sequences), axis=1).flatten()
         
         anomalies_mask = mae > self.threshold
+        
+        # --- NEW: Send alerts for each detected anomaly ---
+        print(f"   -> Found {np.sum(anomalies_mask)} anomalous sequences.")
+        if np.sum(anomalies_mask) > 0:
+            # Reshape for inverse_transform: from (n_sequences, seq_len, 1) to (n_sequences * seq_len, 1)
+            # Then reshape back to (n_sequences, seq_len)
+            original_sequences_inv = self.scaler.inverse_transform(
+                sequences.reshape(-1, 1)
+            ).reshape(sequences.shape[0], SEQUENCE_LENGTH)
+            
+            reconstructed_sequences_inv = self.scaler.inverse_transform(
+                reconstructions.reshape(-1, 1)
+            ).reshape(reconstructions.shape[0], SEQUENCE_LENGTH)
+
+            for i, is_anomaly in enumerate(anomalies_mask):
+                if is_anomaly:
+                    sequence_timestamps = df.index[i : i + SEQUENCE_LENGTH]
+                    
+                    payload = {
+                        "sensor_id": SENSOR_ID,
+                        "alert_timestamp": sequence_timestamps[-1].isoformat(), # No more manual "+ Z"
+                        "anomaly_score": float(mae[i]),
+                        "threshold": float(self.threshold),
+                        "sequence_data": {
+                            "timestamps": [ts.isoformat() for ts in sequence_timestamps], # No more manual "+ Z"
+                            "original_values": original_sequences_inv[i].flatten().tolist(),
+                            "reconstructed_values": reconstructed_sequences_inv[i].flatten().tolist(),
+                        }
+                    }
+                    send_alert_to_server(payload)
+        # --- END NEW ---
         
         # --- NEW: Create reconstructed series for plotting ---
         reconstructions_inv = self.scaler.inverse_transform(reconstructions.reshape(-1, 1)).reshape(sequences.shape[0], SEQUENCE_LENGTH)
@@ -136,7 +194,6 @@ class Predictor:
         error_df['threshold'] = self.threshold
         error_df['is_anomaly'] = anomalies_mask
         
-        print(f"   -> Found {np.sum(anomalies_mask)} anomalous sequences.")
         return results_df, error_df
 
     def plot_predictions(self, results_df, error_df, input_filename):

@@ -56,3 +56,8 @@ LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 # API Rate Limiting
 API_DELAY_SECONDS = 1  # Delay between API calls to avoid rate limiting
 MAX_RETRIES = 3  # Maximum number of retries for failed API calls
+
+# Alerting Configuration
+ALERTING_ENABLED = True
+ALERTING_API_ENDPOINT = "http://127.0.0.1:8000/api/alerts"
+SENSOR_ID = "madrid_station_28079004"
