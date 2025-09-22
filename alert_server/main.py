@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dateutil.parser import isoparse
 from models import AlertPayload
-from database import save_alert, get_alerts, get_alert_by_id
+from database import save_alert, get_alerts, get_alert_by_id, get_total_alerts_count
 
 app = FastAPI(
     title="IoT Anomaly Alerting API",
@@ -25,14 +25,40 @@ def read_root():
     return {"status": "ok", "message": "Alerting API is running."}
 
 @app.get("/dashboard", response_class=HTMLResponse, tags=["Monitoring"])
-def view_dashboard(request: Request):
+def view_dashboard(request: Request, page: int = 1, per_page: int = 12):
     """
-    Renders the monitoring dashboard, displaying the latest alerts.
+    Renders the monitoring dashboard with pagination support.
     """
-    alerts_data = get_alerts()
+    # Calculate offset based on page number
+    offset = (page - 1) * per_page
+
+    # Get paginated alerts and total count
+    alerts_data = get_alerts(limit=per_page, offset=offset)
+    total_alerts = get_total_alerts_count()
+
+    # Calculate pagination info
+    total_pages = (total_alerts + per_page - 1) // per_page  # Ceiling division
+    has_prev = page > 1
+    has_next = page < total_pages
+
+    pagination_info = {
+        "current_page": page,
+        "per_page": per_page,
+        "total_alerts": total_alerts,
+        "total_pages": total_pages,
+        "has_prev": has_prev,
+        "has_next": has_next,
+        "prev_page": page - 1 if has_prev else None,
+        "next_page": page + 1 if has_next else None,
+    }
+
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "alerts": alerts_data}
+        {
+            "request": request,
+            "alerts": alerts_data,
+            "pagination": pagination_info
+        }
     )
 
 @app.get("/dashboard/alert/{alert_id}", response_class=HTMLResponse, tags=["Monitoring"])

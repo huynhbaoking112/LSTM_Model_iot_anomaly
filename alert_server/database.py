@@ -54,12 +54,13 @@ def save_alert(alert_data: dict) -> (bool, str):
         print(f"   -> ❌ {error_message}")
         return False, error_message
 
-def get_alerts(limit: int = 50) -> list:
+def get_alerts(limit: int = 50, offset: int = 0) -> list:
     """
-    Retrieves the most recent alerts from the database.
+    Retrieves alerts from the database with pagination support.
 
     Args:
         limit (int): The maximum number of alerts to retrieve.
+        offset (int): The number of alerts to skip for pagination.
 
     Returns:
         list: A list of alert documents, or an empty list if none are found or on error.
@@ -67,14 +68,30 @@ def get_alerts(limit: int = 50) -> list:
     if alerts_collection is None:
         print("   -> ❌ Database collection is not available.")
         return []
-    
+
     try:
         # Sort by 'alert_timestamp' in descending order to get the newest first
-        alerts = alerts_collection.find().sort("alert_timestamp", DESCENDING).limit(limit)
+        alerts = alerts_collection.find().sort("alert_timestamp", DESCENDING).skip(offset).limit(limit)
         return list(alerts)
     except OperationFailure as e:
         print(f"   -> ❌ Failed to fetch alerts from DB: {e}")
         return []
+
+def get_total_alerts_count() -> int:
+    """
+    Gets the total count of alerts in the database.
+
+    Returns:
+        int: The total number of alerts.
+    """
+    if alerts_collection is None:
+        return 0
+
+    try:
+        return alerts_collection.count_documents({})
+    except OperationFailure as e:
+        print(f"   -> ❌ Failed to count alerts: {e}")
+        return 0
 
 def get_alert_by_id(alert_id: str) -> dict:
     """

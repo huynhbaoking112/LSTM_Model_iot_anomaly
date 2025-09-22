@@ -88,5 +88,12 @@
     -   [x] Cập nhật link trong `index.html` để trỏ đến trang chi tiết.
     -   [x] Viết mã JavaScript trong `alert_detail.html` để vẽ biểu đồ từ dữ liệu được truyền vào.
 
+-   [x] **Thêm Pagination**
+    -   [x] Cập nhật `database.py` để hỗ trợ limit và offset cho phân trang.
+    -   [x] Thêm hàm `get_total_alerts_count()` để đếm tổng số alerts.
+    -   [x] Cập nhật endpoint `/dashboard` để xử lý query parameters `page` và `per_page`.
+    -   [x] Tạo pagination controls trong template `index.html`.
+    -   [x] Thêm CSS styling cho pagination với responsive design.
+
 ---
 **Hoàn thành các bước trên sẽ tạo ra một hệ thống cảnh báo end-to-end hoàn chỉnh và mạnh mẽ.**
