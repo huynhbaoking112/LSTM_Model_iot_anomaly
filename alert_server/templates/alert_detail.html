@@ -3,49 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alert Detail - {{ alert.sensor_id }}</title>
+    <title>Alert Analysis - {{ alert.sensor_id }}</title>
     <link rel="stylesheet" href="/static/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
 </head>
 <body>
-    <div class="container">
-        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+    <!-- Header -->
+    <header class="detail-header">
+        <div class="container">
+            <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </header>
 
-        <div class="alert-details">
-            <h3>Alert Details</h3>
-            <div class="detail-row">
-                <span class="detail-label">Sensor ID:</span>
-                <span class="detail-value">{{ alert.sensor_id }}</span>
+    <!-- Main Content -->
+    <main class="container">
+        <div class="detail-content">
+            <!-- Alert Information -->
+            <div class="detail-info-card">
+                <div class="detail-info-header">
+                    <h2 class="detail-info-title">{{ alert.sensor_id }}</h2>
+                    <p class="detail-info-subtitle">Anomaly Detection Analysis</p>
+                </div>
+
+                <div class="detail-info-body">
+                    <div class="detail-info-grid">
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Detection Time</div>
+                            <div class="detail-info-value">{{ alert.alert_timestamp.strftime('%Y-%m-%d') }}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Detection Hour</div>
+                            <div class="detail-info-value">{{ alert.alert_timestamp.strftime('%H:%M:%S') }} UTC</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Anomaly Score</div>
+                            <div class="detail-info-value large">{{ "%.4f"|format(alert.anomaly_score) }}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Alert Threshold</div>
+                            <div class="detail-info-value">{{ "%.4f"|format(alert.threshold) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="sequence-info">
+                        <h4>📊 Sequence Analysis</h4>
+                        <p>This sequence contains {{ alert.sequence_data.timestamps|length }} data points from {{ alert.sequence_data.timestamps[0].strftime('%H:%M') }} to {{ alert.sequence_data.timestamps[-1].strftime('%H:%M') }} UTC.</p>
+                    </div>
+                </div>
             </div>
-            <div class="detail-row">
-                <span class="detail-label">Alert Timestamp:</span>
-                <span class="detail-value">{{ alert.alert_timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Anomaly Score:</span>
-                <span class="detail-value score">{{ "%.4f"|format(alert.anomaly_score) }}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Threshold:</span>
-                <span class="detail-value threshold">{{ "%.4f"|format(alert.threshold) }}</span>
+
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <h3>NO2 Anomaly Visualization</h3>
+                    <p class="chart-description">Comparison between original sensor readings and model reconstruction</p>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="anomalyChart"></canvas>
+                </div>
             </div>
         </div>
-
-        <div class="sequence-info">
-            <h4>Sequence Data Visualization</h4>
-            <p>This chart shows the original NO2 values vs. the model's reconstruction for the anomalous sequence.</p>
-
-            <div class="chart-container">
-                <canvas id="anomalyChart"></canvas>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script>
         // Prepare data for Chart.js
         const timestamps = [
             {% for ts in alert.sequence_data.timestamps %}
-                "{{ ts.strftime('%Y-%m-%d %H:%M:%S') }}",
+                "{{ ts.strftime('%H:%M') }}",
             {% endfor %}
         ];
 
@@ -61,6 +87,12 @@
             {% endfor %}
         ];
 
+        // Calculate some statistics
+        const anomalyScore = {{ alert.anomaly_score }};
+        const threshold = {{ alert.threshold }};
+        const maxOriginal = Math.max(...originalValues);
+        const maxReconstructed = Math.max(...reconstructedValues);
+
         // Create the chart
         const ctx = document.getElementById('anomalyChart').getContext('2d');
         const anomalyChart = new Chart(ctx, {
@@ -70,50 +102,117 @@
                 datasets: [{
                     label: 'Original NO2 Values',
                     data: originalValues,
-                    borderColor: 'rgba(231, 76, 60, 1)',
-                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                    borderWidth: 2,
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
                     fill: false,
-                    tension: 0.1
+                    tension: 0.4,
+                    pointBackgroundColor: originalValues.map((val, idx) => {
+                        // Highlight points where original significantly differs from reconstructed
+                        const diff = Math.abs(val - reconstructedValues[idx]);
+                        return diff > threshold * 2 ? 'rgba(239, 68, 68, 1)' : 'rgba(239, 68, 68, 0.3)';
+                    }),
+                    pointRadius: originalValues.map((val, idx) => {
+                        const diff = Math.abs(val - reconstructedValues[idx]);
+                        return diff > threshold * 2 ? 6 : 3;
+                    }),
+                    pointHoverRadius: 8
                 }, {
-                    label: 'Reconstructed Values',
+                    label: 'Model Reconstruction',
                     data: reconstructedValues,
-                    borderColor: 'rgba(52, 152, 219, 1)',
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                    borderWidth: 2,
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 3,
                     fill: false,
-                    tension: 0.1
+                    tension: 0.4,
+                    borderDash: [5, 5],
+                    pointRadius: 2,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Timestamp'
+                            text: 'Time (UTC)',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
                         },
                         ticks: {
                             maxRotation: 45,
-                            minRotation: 45
+                            minRotation: 45,
+                            font: {
+                                size: 10
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'NO2 (μg/m³)'
+                            text: 'NO2 Concentration (μg/m³)',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     }
                 },
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 11
+                            }
+                        }
                     },
                     title: {
                         display: true,
-                        text: 'Anomalous Sequence: Original vs Reconstructed Values'
+                        text: `Anomaly Analysis - Score: ${anomalyScore.toFixed(4)} (Threshold: ${threshold.toFixed(4)})`,
+                        font: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        cornerRadius: 8,
+                        displayColors: true,
+                        callbacks: {
+                            title: function(context) {
+                                const index = context[0].dataIndex;
+                                return `Time: ${timestamps[index]}`;
+                            },
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                const dataset = context.dataset.label;
+                                return `${dataset}: ${value.toFixed(2)} μg/m³`;
+                            }
+                        }
                     }
                 }
             }
