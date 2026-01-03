@@ -31,7 +31,7 @@ LSTM_UNITS_DECODER = [64, 128]  # Units in Decoder layers
 DROPOUT_RATE = 0.2             # Dropout rate for regularization
 
 # Anomaly Detection Threshold
-ANOMALY_THRESHOLD_PERCENTILE = 80  # Use 95th percentile of validation errors as threshold
+ANOMALY_THRESHOLD_PERCENTILE = 95  # Use 95th percentile of validation errors as threshold
 NO2_SPIKE_MULTIPLIER = 2.0  # Detect spikes > 3x normal levels
 
 # NO2 Temporal Pattern Configuration
